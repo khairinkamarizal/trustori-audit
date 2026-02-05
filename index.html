@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packaging Data Infrastructure Audit | Trustori</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Hanken Grotesk as specified in Brand Guide -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Hanken Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        trustori: {
+                            blue: '#0047BA',     /* Pantone 2728 C */
+                            dark: '#24272A',     /* Pantone 426 C */
+                            orange: '#FF671D',   /* Pantone 165 C */
+                            lightblue: '#2A7DE1' /* Pantone 2727 C */
+                        }
+                    },
+                    backgroundImage: {
+                        'brand-mesh': 'linear-gradient(135deg, #0047BA 0%, #002e7a 50%, #24272A 100%)',
+                        'brand-accent': 'linear-gradient(90deg, #0047BA 0%, #2A7DE1 50%, #FF671D 100%)'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out forwards',
+                        'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Hanken Grotesk', sans-serif; background-color: #F8F9FA; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #F1F5F9; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+        /* Custom Range Slider - Trustori Style */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #FF671D; /* Trustori Orange */
+            border: 3px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+            margin-top: -10px; 
+            transition: transform 0.2s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #E2E8F0;
+            border-radius: 2px;
+        }
+        input[type=range]:focus { outline: none; }
+        
+        /* Smooth Scroll */
+        html { scroll-behavior: smooth; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; color: black; }
+            #results-section { display: block !important; }
+            #survey-container { display: none !important; }
+            .bg-trustori-blue { background-color: white !important; color: black !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+<body class="text-trustori-dark antialiased min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="absolute top-0 z-50 w-full border-b border-white/10">
+        <div class="container max-w-7xl mx-auto h-20 flex items-center justify-between px-6 md:px-8">
+            <div class="flex items-center gap-3">
+                <!-- Trustori Logo Symbol (Luban Lock representation) -->
+                <div class="relative w-8 h-8 flex items-center justify-center">
+                    <i class="fa-solid fa-asterisk text-white text-2xl"></i> 
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-2xl text-white tracking-tight leading-none">trustori</span>
+                    <span class="text-[9px] text-white/80 uppercase tracking-[0.2em] font-medium mt-0.5">The Brand Custodian</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-6 no-print">
+                <button onclick="window.print()" class="text-white/80 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium">
+                    <i class="fa-solid fa-print"></i> Save Report
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section (Mesh Gradient Background) -->
+    <header class="bg-brand-mesh relative pt-40 pb-32 px-6 md:px-8 overflow-hidden">
+        <!-- Abstract Shapes for Mesh Effect -->
+        <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-trustori-orange/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none mix-blend-screen"></div>
+        <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-trustori-lightblue/20 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4 pointer-events-none mix-blend-screen"></div>
+
+        <div class="container max-w-7xl mx-auto relative z-10">
+            <div class="max-w-4xl animate-slide-up">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full mb-6">
+                    <span class="w-2 h-2 rounded-full bg-trustori-orange"></span>
+                    <span class="text-white text-xs font-bold uppercase tracking-widest">Mark of Authenticity</span>
+                </div>
+                <h1 class="text-5xl md:text-7xl font-bold text-white leading-[1.1] mb-6 tracking-tight">
+                    Packaging Infrastructure <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">Audit Assessment</span>
+                </h1>
+                <p id="page-subtitle" class="text-lg md:text-xl text-white/80 font-normal leading-relaxed max-w-2xl">
+                    Evaluate your brand's data maturity. Bridge the gap between scientific authority and consumer-focused empowerment.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 container max-w-5xl mx-auto -mt-20 relative z-20 px-4 md:px-0 mb-24">
+
+        <!-- Survey Card -->
+        <div id="survey-container" class="bg-white rounded-lg shadow-xl shadow-trustori-dark/5 p-8 md:p-12 animate-slide-up" style="animation-delay: 0.1s;">
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-6 border-b border-gray-100">
+                <div>
+                    <h3 class="text-2xl font-bold text-trustori-blue mb-2">Self-Assessment</h3>
+                    <p class="text-gray-500">Rate your current organizational capabilities.</p>
+                </div>
+                <div class="flex items-center gap-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                    <span>1 (Reactive)</span>
+                    <div class="h-1 w-24 bg-gray-100 rounded-full"></div>
+                    <span>10 (Predictive)</span>
+                </div>
+            </div>
+            
+            <div class="space-y-10">
+                <!-- Question 1 -->
+                <div class="group">
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="text-lg font-bold text-trustori-dark group-hover:text-trustori-blue transition-colors">1. Consumer Data Capture</label>
+                        <div class="w-10 h-10 rounded-full bg-trustori-blue/5 flex items-center justify-center border border-trustori-blue/10">
+                             <span class="text-xl font-bold text-trustori-blue" id="val-q1">1</span>
+                        </div>
+                    </div>
+                    <input type="range" min="1" max="10" value="1" class="w-full" id="input-q1" oninput="updateLabels()">
+                    <p class="text-sm text-gray-400 mt-2">To what extent do you capture end-consumer contact info directly via packaging?</p>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="group">
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="text-lg font-bold text-trustori-dark group-hover:text-trustori-blue transition-colors">2. Supply Chain Visibility</label>
+                        <div class="w-10 h-10 rounded-full bg-trustori-blue/5 flex items-center justify-center border border-trustori-blue/10">
+                             <span class="text-xl font-bold text-trustori-blue" id="val-q2">2</span>
+                        </div>
+                    </div>
+                    <input type="range" min="1" max="10" value="2" class="w-full" id="input-q2" oninput="updateLabels()">
+                    <p class="text-sm text-gray-400 mt-2">Precision of unit-level tracking (beyond batch/lot) after leaving the warehouse.</p>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="group">
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="text-lg font-bold text-trustori-dark group-hover:text-trustori-blue transition-colors">3. Anti-Counterfeit Strength</label>
+                        <div class="w-10 h-10 rounded-full bg-trustori-blue/5 flex items-center justify-center border border-trustori-blue/10">
+                             <span class="text-xl font-bold text-trustori-blue" id="val-q3">3</span>
+                        </div>
+                    </div>
+                    <input type="range" min="1" max="10" value="3" class="w-full" id="input-q3" oninput="updateLabels()">
+                    <p class="text-sm text-gray-400 mt-2">Difficulty for bad actors to replicate your physical and digital security features.</p>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="group">
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="text-lg font-bold text-trustori-dark group-hover:text-trustori-blue transition-colors">4. Serialization Depth</label>
+                        <div class="w-10 h-10 rounded-full bg-trustori-blue/5 flex items-center justify-center border border-trustori-blue/10">
+                             <span class="text-xl font-bold text-trustori-blue" id="val-q4">2</span>
+                        </div>
+                    </div>
+                    <input type="range" min="1" max="10" value="2" class="w-full" id="input-q4" oninput="updateLabels()">
+                    <p class="text-sm text-gray-400 mt-2">Level of unique digital identity assignment per sellable unit.</p>
+                </div>
+
+                 <!-- Question 5 -->
+                 <div class="group">
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="text-lg font-bold text-trustori-dark group-hover:text-trustori-blue transition-colors">5. Digital Engagement</label>
+                        <div class="w-10 h-10 rounded-full bg-trustori-blue/5 flex items-center justify-center border border-trustori-blue/10">
+                             <span class="text-xl font-bold text-trustori-blue" id="val-q5">1</span>
+                        </div>
+                    </div>
+                    <input type="range" min="1" max="10" value="1" class="w-full" id="input-q5" oninput="updateLabels()">
+                    <p class="text-sm text-gray-400 mt-2">Effectiveness of QR/NFC triggers at driving user action and loyalty.</p>
+                </div>
+            </div>
+
+            <div class="mt-16 flex justify-end">
+                <button onclick="calculateAndShowResults()" class="bg-trustori-blue hover:bg-blue-800 text-white font-bold py-4 px-10 rounded shadow-lg shadow-blue-900/20 transition-all duration-300 flex items-center gap-3 group">
+                    GENERATE ANALYSIS
+                    <i class="fa-solid fa-arrow-right text-trustori-orange group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- RESULTS SECTION -->
+        <div id="results-section" class="hidden animate-fade-in space-y-8">
+            
+            <div class="bg-white rounded-lg shadow-xl shadow-trustori-dark/5 overflow-hidden border border-gray-100">
+                <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[500px]">
+                    
+                    <!-- Left: Radar Chart (White Background) -->
+                    <div class="lg:col-span-8 p-8 md:p-12 relative flex flex-col justify-center">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 class="text-2xl font-bold text-trustori-dark">Performance Matrix</h3>
+                                <p class="text-sm text-gray-500 mt-1">Benchmarking against Industry Gold Standard.</p>
+                            </div>
+                            <div class="flex gap-6 text-[10px] font-bold uppercase tracking-widest">
+                                <div class="flex items-center gap-2">
+                                    <span class="block w-3 h-1 bg-trustori-orange"></span> YOU
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="block w-3 h-1 bg-trustori-blue"></span> GOAL
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative w-full h-[400px] flex items-center justify-center">
+                            <canvas id="auditRadarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Right: Score Panel (Trustori Blue Background) -->
+                    <div class="lg:col-span-4 bg-trustori-blue p-8 md:p-12 flex flex-col justify-center relative text-white">
+                        <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                            <i class="fa-solid fa-asterisk text-9xl"></i>
+                        </div>
+                        
+                        <div class="relative z-10">
+                            <span class="text-trustori-orange text-xs font-bold uppercase tracking-[0.2em] block mb-4">Maturity Index</span>
+                            <div class="text-6xl font-bold text-white mb-2" id="score-total">Low</div>
+                            <div class="w-12 h-1.5 bg-trustori-orange mb-8"></div>
+                            
+                            <p class="text-white/80 font-normal leading-relaxed mb-12 text-sm" id="score-description">
+                                Analysis pending...
+                            </p>
+                            
+                            <button onclick="resetAnalysis()" class="w-full bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold py-4 px-6 rounded transition-all duration-300 flex items-center justify-center gap-3 text-sm tracking-wide">
+                                <i class="fa-solid fa-rotate-left"></i>
+                                RETRY ASSESSMENT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="recommendations-container">
+                <!-- Injected via JS -->
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto no-print">
+        <div class="container max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-asterisk text-trustori-blue text-xl"></i>
+                <div class="flex flex-col">
+                    <span class="font-bold text-lg text-trustori-dark leading-none">trustori</span>
+                </div>
+            </div>
+            <p class="text-xs text-gray-400">
+                &copy; 2025 Trustori. Protecting Originality. Empowering Growth.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Logic Script -->
+    <script>
+        let radarChartInstance = null;
+
+        function updateLabels() {
+            document.getElementById('val-q1').innerText = document.getElementById('input-q1').value;
+            document.getElementById('val-q2').innerText = document.getElementById('input-q2').value;
+            document.getElementById('val-q3').innerText = document.getElementById('input-q3').value;
+            document.getElementById('val-q4').innerText = document.getElementById('input-q4').value;
+            document.getElementById('val-q5').innerText = document.getElementById('input-q5').value;
+        }
+
+        function resetAnalysis() {
+            const resultsSection = document.getElementById('results-section');
+            const surveyContainer = document.getElementById('survey-container');
+            const subTitle = document.getElementById('page-subtitle');
+            
+            // UI Toggle
+            resultsSection.classList.add('hidden');
+            surveyContainer.classList.remove('hidden');
+            
+            // Smooth Scroll top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Reset Text
+            if(subTitle) subTitle.innerText = "Evaluate your brand's data maturity. Bridge the gap between scientific authority and consumer-focused empowerment.";
+        }
+
+        function calculateAndShowResults() {
+            const q1 = parseInt(document.getElementById('input-q1').value);
+            const q2 = parseInt(document.getElementById('input-q2').value);
+            const q3 = parseInt(document.getElementById('input-q3').value);
+            const q4 = parseInt(document.getElementById('input-q4').value);
+            const q5 = parseInt(document.getElementById('input-q5').value);
+
+            const surveyContainer = document.getElementById('survey-container');
+            const resultsSection = document.getElementById('results-section');
+            const subTitle = document.getElementById('page-subtitle');
+
+            // UI Toggle
+            surveyContainer.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            
+            if(subTitle) subTitle.innerHTML = "Audit complete. Review your performance matrix below.";
+
+            renderRadarChart([q1, q2, q3, q4, q5]);
+
+            const totalAvg = (q1 + q2 + q3 + q4 + q5) / 5;
+            const totalLabel = document.getElementById('score-total');
+            const totalDesc = document.getElementById('score-description');
+            
+            if (totalAvg < 4) {
+                totalLabel.innerText = "Low";
+                totalLabel.className = "text-6xl font-bold text-white mb-2"; 
+                totalDesc.innerText = "Defensive Posture. Your packaging is currently operating as a static cost center.";
+            } else if (totalAvg < 7.5) {
+                totalLabel.innerText = "Medium";
+                totalLabel.className = "text-6xl font-bold text-trustori-orange mb-2";
+                totalDesc.innerText = "Transitioning. You have partial visibility but lack closed-loop data intelligence.";
+            } else {
+                totalLabel.innerText = "High";
+                totalLabel.className = "text-6xl font-bold text-trustori-lightblue mb-2";
+                totalDesc.innerText = "Strategic Asset. Your infrastructure is actively driving growth and security.";
+            }
+
+            generateRecommendations(q1, q2, q3, q4, q5);
+            
+            // Scroll to results
+            setTimeout(() => {
+                const navHeight = 100;
+                const targetPosition = resultsSection.getBoundingClientRect().top + window.scrollY - navHeight;
+                window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+            }, 100);
+        }
+
+        function renderRadarChart(dataValues) {
+            const ctx = document.getElementById('auditRadarChart').getContext('2d');
+            if (radarChartInstance) radarChartInstance.destroy();
+
+            // Colors based on Trustori Palette
+            const blue = '#0047BA';
+            const orange = '#FF671D';
+            const grey = '#E2E8F0';
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Consumer Data', 'SC Visibility', 'Anti-Counterfeit', 'Serialization', 'Engagement'],
+                    datasets: [
+                        {
+                            label: 'You',
+                            data: dataValues,
+                            fill: false,
+                            backgroundColor: 'transparent',
+                            borderColor: orange,
+                            pointBackgroundColor: orange, // Solid Dots
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            borderWidth: 3,
+                            tension: 0
+                        },
+                        {
+                            label: 'Goal',
+                            data: [9, 9, 10, 10, 9],
+                            fill: false,
+                            backgroundColor: 'transparent',
+                            borderColor: blue,
+                            pointBackgroundColor: blue, // Solid Dots
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            borderWidth: 3,
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: grey },
+                            grid: { color: grey },
+                            pointLabels: {
+                                font: { family: "'Hanken Grotesk', sans-serif", size: 13, weight: '600' },
+                                color: '#64748b'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10,
+                            ticks: { display: false, stepSize: 2 }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false } // Custom legend in HTML
+                    }
+                }
+            });
+        }
+
+        function generateRecommendations(q1, q2, q3, q4, q5) {
+            const container = document.getElementById('recommendations-container');
+            container.innerHTML = ''; 
+
+            const addCard = (title, text, tag) => {
+                const html = `
+                    <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow flex flex-col h-full border-l-4 border-l-trustori-orange group">
+                        <div class="mb-4">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-trustori-blue bg-blue-50 px-3 py-1 inline-block rounded-sm">
+                                ${tag}
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-xl text-trustori-dark mb-3 group-hover:text-trustori-blue transition-colors">${title}</h4>
+                        <p class="text-gray-500 leading-relaxed flex-grow text-sm">${text}</p>
+                    </div>
+                `;
+                container.innerHTML += html;
+            };
+
+            let count = 0;
+            if (q4 < 5) {
+                addCard("Implement Digital Twin (Serialization)", "Migrate from batch codes to unique digital IDs per unit. This is the absolute foundation for tracking and engagement.", "Critical Infrastructure");
+                count++;
+            }
+            if (q1 < 4 || q5 < 4) {
+                addCard("Deploy Direct-to-Consumer Loop", "Your current QR strategy is passive. Implement value-exchange triggers (Warranty, Authenticity Check) to capture user emails.", "Growth Asset");
+                count++;
+            }
+            if (q2 < 5) {
+                addCard("Geo-Fencing & Grey Market Detection", "Integrate scan data with your ERP. Flag scans that appear in unauthorized regions automatically.", "Loss Prevention");
+                count++;
+            }
+            if (q3 < 5) {
+                addCard("Layered Authentication", "Add a digital verification layer (like a dynamic landing page) to your physical security features to prevent easy copying.", "Brand Protection");
+                count++;
+            }
+            if (count === 0) {
+                 addCard("Optimization Phase", "Your infrastructure is robust. Focus on analyzing the data you are collecting to optimize supply chain efficiency.", "Advanced Optimization");
+                 addCard("Loyalty Integration", "Deepen the connection by integrating scan data directly into your loyalty rewards program.", "Retention");
+            }
+        }
+    </script>
+</body>
+</html>
