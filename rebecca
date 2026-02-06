@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trustori Business Audit</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Hanken Grotesk (Official Brand Font) -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* BRAND COLORS - Based on Guide Page 11 */
+        :root {
+            --trustori-blue: #0047BA;
+            --trustori-dark: #24272A;
+            --trustori-orange: #FF671D;
+            --trustori-light-blue: #2A7DE1;
+        }
+
+        body {
+            font-family: 'Hanken Grotesk', sans-serif;
+            background-color: #F8FAFC; /* Very light slate for clinical feel */
+            color: var(--trustori-dark);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Interactions */
+        .option-card {
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #E2E8F0;
+        }
+        .option-card:hover {
+            border-color: var(--trustori-blue);
+            box-shadow: 0 4px 12px rgba(0, 71, 186, 0.08); /* Blue shadow */
+            transform: translateY(-1px);
+        }
+        .option-card.selected {
+            border-color: var(--trustori-blue);
+            background-color: #F0F7FF;
+        }
+
+        /* BRAND GRADIENT - Blue to Orange (Guide Page 12) */
+        .brand-gradient {
+            background: linear-gradient(135deg, #0047BA 0%, #2A7DE1 60%, #FF671D 100%);
+        }
+        
+        /* Text Utilities */
+        .text-trustori-blue { color: var(--trustori-blue); }
+        .text-trustori-orange { color: var(--trustori-orange); }
+        .text-trustori-dark { color: var(--trustori-dark); }
+        
+        /* Custom Button Hover */
+        .btn-hover:hover {
+            filter: brightness(110%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Main Container -->
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-xl overflow-hidden relative min-h-[500px] flex flex-col border border-slate-100">
+        
+        <!-- Header -->
+        <div class="bg-white p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 z-10">
+            <div class="flex items-center gap-3">
+                <!-- Abstract Logo Representation (Asterisk/Lock) -->
+                <div class="text-2xl text-trustori-blue">
+                    <i class="fa-solid fa-asterisk"></i> 
+                </div>
+                <div class="flex flex-col leading-none">
+                    <span class="font-extrabold text-xl tracking-tight text-[#24272A]">trustori</span>
+                    <span class="text-[0.65rem] uppercase tracking-widest text-slate-400 font-bold">The Brand Custodian</span>
+                </div>
+            </div>
+            <div class="text-xs font-bold text-trustori-blue uppercase tracking-widest" id="progress-text">Step 1</div>
+        </div>
+        
+        <!-- Progress Line (Orange for Growth/Energy) -->
+        <div class="w-full bg-slate-100 h-1">
+            <div id="progress-bar" class="bg-[#FF671D] h-1 transition-all duration-500 ease-out" style="width: 0%"></div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="p-8 md:p-10 flex-grow flex flex-col justify-center" id="app-content">
+            <!-- Dynamic Content Injected Here via JS -->
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 text-center text-slate-300 text-[10px] border-t border-slate-50 uppercase tracking-wider">
+            &copy; 2025 Trustori | The Mark of Authenticity
+        </div>
+
+    </div>
+
+    <script>
+        // --- Configuration & Data ---
+        
+        const questions = [
+            {
+                id: 'q1',
+                question: "Consumer Data Capture",
+                subtext: "How do you currently collect and manage customer information?",
+                options: [
+                    { value: 1, label: "No Data", desc: "We don't systematically collect consumer data.", icon: "fa-ban" },
+                    { value: 2, label: "Partial Data", desc: "Website, Ads, or Dealer data (Fragmented).", icon: "fa-chart-pie" },
+                    { value: 3, label: "Full CRM", desc: "Centralized, automated CRM data.", icon: "fa-database" }
+                ]
+            },
+            {
+                id: 'q2',
+                question: "Supply Chain Visibility",
+                subtext: "Can you track your products from manufacturing to the end consumer?",
+                options: [
+                    { value: 1, label: "No Visibility", desc: "We lose track after it leaves the warehouse.", icon: "fa-eye-slash" },
+                    { value: 2, label: "Limited Visibility", desc: "We track to distributors but not end users.", icon: "fa-eye-low-vision" },
+                    { value: 3, label: "Full Visibility", desc: "End-to-end tracking down to the unit.", icon: "fa-eye" }
+                ]
+            },
+            {
+                id: 'q3',
+                question: "Market Visibility",
+                subtext: "How much insight do you have into real-time market performance?",
+                options: [
+                    { value: 1, label: "No Visibility", desc: "We rely on delayed sales reports.", icon: "fa-cloud" },
+                    { value: 2, label: "Limited Visibility", desc: "Monthly or quarterly insights.", icon: "fa-binoculars" },
+                    { value: 3, label: "Full Visibility", desc: "Real-time dashboards and analytics.", icon: "fa-chart-line" }
+                ]
+            },
+            {
+                id: 'q4',
+                question: "Anti-counterfeit Strength",
+                subtext: "What measures protect your brand from fakes?",
+                options: [
+                    { value: 1, label: "No Security", desc: "No specific measures in place.", icon: "fa-lock-open" },
+                    { value: 2, label: "Basic Security", desc: "Standard holograms or stickers.", icon: "fa-ticket" },
+                    { value: 3, label: "Strong Security", desc: "Digital verification & encrypted tech.", icon: "fa-shield-halved" }
+                ]
+            },
+            {
+                id: 'q5',
+                question: "Warranty Strength",
+                subtext: "How is your warranty registration process handled?",
+                options: [
+                    { value: 1, label: "Manual", desc: "Paper cards or manual entry.", icon: "fa-file-pen" },
+                    { value: 2, label: "Semi-Manual", desc: "Basic web form, manual approval.", icon: "fa-laptop" },
+                    { value: 3, label: "Fully Automated", desc: "Instant digital activation.", icon: "fa-robot" }
+                ]
+            },
+            {
+                id: 'q6',
+                question: "Campaign Strength",
+                subtext: "How do you execute marketing campaigns?",
+                options: [
+                    { value: 1, label: "Manual", desc: "Ad-hoc, manual execution.", icon: "fa-bullhorn" },
+                    { value: 2, label: "Semi-Manual", desc: "Some tools, but requires human oversight.", icon: "fa-gears" },
+                    { value: 3, label: "Fully Automated", desc: "Trigger-based, AI-driven automation.", icon: "fa-rocket" }
+                ]
+            },
+            {
+                id: 'q7',
+                question: "Reporting",
+                subtext: "How do you generate business intelligence reports?",
+                options: [
+                    { value: 1, label: "Manual", desc: "Spreadsheets and manual compilation.", icon: "fa-table" },
+                    { value: 2, label: "Semi-Manual", desc: "Exporting data from tools to Excel.", icon: "fa-file-export" },
+                    { value: 3, label: "Fully Automated", desc: "Live, dynamic reporting dashboards.", icon: "fa-chart-pie" }
+                ]
+            }
+        ];
+
+        // --- State Management ---
+        let state = {
+            step: 0, // 0 = Contact, 1-7 = Questions, 8 = Results
+            score: 0,
+            contact: {
+                company: '',
+                name: '',
+                phone: '',
+                email: ''
+            },
+            answers: []
+        };
+
+        // --- DOM Elements ---
+        const contentDiv = document.getElementById('app-content');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        // --- Logic Functions ---
+
+        function init() {
+            renderContactForm();
+        }
+
+        function updateProgress() {
+            const totalSteps = questions.length + 1; 
+            let percent = 0;
+            if(state.step === 0) percent = 10;
+            else if (state.step > questions.length) percent = 100;
+            else percent = 10 + ((state.step / questions.length) * 90);
+            
+            progressBar.style.width = `${percent}%`;
+            
+            if(state.step === 0) progressText.innerText = "Identity";
+            else if (state.step <= questions.length) progressText.innerText = `0${state.step} / 0${questions.length}`;
+            else progressText.innerText = "Complete";
+        }
+
+        function submitContact(e) {
+            e.preventDefault();
+            const form = e.target;
+            state.contact.company = form.company.value;
+            state.contact.name = form.name.value;
+            state.contact.phone = form.phone.value;
+            state.contact.email = form.email.value;
+            state.step = 1;
+            renderQuestion(0); 
+        }
+
+        function handleAnswer(scoreValue) {
+            state.score += scoreValue;
+            state.answers.push(scoreValue);
+
+            if (state.step < questions.length) {
+                const nextQIndex = state.step;
+                state.step++;
+                renderQuestion(nextQIndex);
+            } else {
+                state.step++;
+                calculateAndRenderResults();
+            }
+        }
+
+        // --- Render Functions ---
+
+        function renderContactForm() {
+            updateProgress();
+            contentDiv.innerHTML = `
+                <div class="fade-in max-w-lg mx-auto">
+                    <h2 class="text-3xl font-extrabold text-[#24272A] mb-3 tracking-tight">Audit Your <span class="text-trustori-blue">Brand Security</span></h2>
+                    <p class="text-slate-500 mb-8 leading-relaxed font-medium">Enter your details to generate a comprehensive operational audit. We protect your data as strictly as we protect our clients' brands.</p>
+                    
+                    <form onsubmit="submitContact(event)" class="space-y-5">
+                        <div class="space-y-1">
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest">Company Name</label>
+                            <input required name="company" type="text" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-md focus:ring-2 focus:ring-[#0047BA] focus:border-transparent outline-none transition font-semibold text-[#24272A]" placeholder="e.g. Acme Industries">
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest">Your Name</label>
+                            <input required name="name" type="text" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-md focus:ring-2 focus:ring-[#0047BA] focus:border-transparent outline-none transition font-semibold text-[#24272A]" placeholder="e.g. John Doe">
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest">Contact Number</label>
+                                <input required name="phone" type="tel" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-md focus:ring-2 focus:ring-[#0047BA] focus:border-transparent outline-none transition font-semibold text-[#24272A]" placeholder="+60 12 345 6789">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest">Email Address</label>
+                                <input required name="email" type="email" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-md focus:ring-2 focus:ring-[#0047BA] focus:border-transparent outline-none transition font-semibold text-[#24272A]" placeholder="john@company.com">
+                            </div>
+                        </div>
+
+                        <div class="pt-6">
+                            <button type="submit" class="w-full bg-[#0047BA] hover:bg-[#2A7DE1] text-white font-bold py-4 rounded-md shadow-lg transition-all transform hover:-translate-y-0.5 tracking-wide text-lg btn-hover">
+                                Begin Assessment
+                            </button>
+                            <p class="text-[10px] text-center text-slate-400 mt-4 uppercase tracking-widest font-bold"><i class="fa-solid fa-shield-halved mr-1"></i> Secure Data Environment</p>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function renderQuestion(index) {
+            updateProgress();
+            const q = questions[index];
+            
+            const optionsHtml = q.options.map((opt, i) => `
+                <button onclick="handleAnswer(${opt.value})" 
+                    class="option-card w-full text-left p-5 mb-3 rounded-lg flex items-center gap-5 bg-white group relative overflow-hidden">
+                    
+                    <div class="w-1 bg-[#0047BA] absolute left-0 top-0 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-slate-50 text-slate-400 group-hover:bg-[#0047BA] group-hover:text-white transition-all duration-300">
+                        <i class="fa-solid ${opt.icon} text-sm"></i>
+                    </div>
+                    
+                    <div>
+                        <div class="font-bold text-[#24272A] text-base mb-1 group-hover:text-[#0047BA] transition-colors">${opt.label}</div>
+                        <div class="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">${opt.desc}</div>
+                    </div>
+                </button>
+            `).join('');
+
+            contentDiv.innerHTML = `
+                <div class="fade-in">
+                    <div class="mb-8 border-l-4 border-[#FF671D] pl-4">
+                        <span class="text-[11px] font-bold text-[#FF671D] uppercase tracking-widest">Question 0${index + 1}</span>
+                        <h2 class="text-2xl font-bold text-[#24272A] mt-2 mb-2 tracking-tight">${q.question}</h2>
+                        <p class="text-slate-500 text-sm font-medium">${q.subtext}</p>
+                    </div>
+                    <div class="space-y-2">
+                        ${optionsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function calculateAndRenderResults() {
+            updateProgress();
+            
+            console.log("Submitting Data to Backend:", state);
+
+            const totalScore = state.score;
+            let tier = {};
+
+            // Mapped to Trustori Colors
+            if (totalScore <= 11) {
+                tier = {
+                    title: "Foundation Stage",
+                    // Use Grey/Red for critical to alert user, but keep typography strict
+                    textColor: "text-slate-600",
+                    accent: "border-slate-300",
+                    icon: "fa-shield-virus",
+                    iconColor: "text-slate-400",
+                    msg: "Your business has significant visibility and automation gaps. This poses a risk to scalability and brand protection."
+                };
+            } else if (totalScore <= 17) {
+                tier = {
+                    title: "Growth Stage",
+                    // Orange = "Growth" / Energy in Trustori Brand
+                    textColor: "text-[#FF671D]",
+                    accent: "border-[#FF671D]",
+                    icon: "fa-chart-area",
+                    iconColor: "text-[#FF671D]",
+                    msg: "Your foundation is solid, yet manual processes and brand vulnerabilities are silently draining your profits and throttling growth. You are operating with the brakes on. It is time to integrate full automation and reclaim the revenue you are currently sacrificing."
+                };
+            } else {
+                tier = {
+                    title: "Market Leader",
+                    // Blue = "Trust" / Authority in Trustori Brand
+                    textColor: "text-[#0047BA]",
+                    accent: "border-[#0047BA]",
+                    icon: "fa-certificate",
+                    iconColor: "text-[#0047BA]",
+                    msg: "Excellent. Your systems are mature. It is time to leverage your data for advanced market dominance using Trustori's ecosystem."
+                };
+            }
+
+            contentDiv.innerHTML = `
+                <div class="fade-in text-center">
+                    <!-- Score Circle -->
+                    <div class="w-32 h-32 mx-auto relative flex items-center justify-center mb-6">
+                        <div class="absolute inset-0 rounded-full border-4 ${tier.accent} opacity-20"></div>
+                        <div class="absolute inset-0 rounded-full border-4 ${tier.accent} border-t-transparent animate-spin duration-[3s]"></div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl font-extrabold text-[#24272A]">${totalScore}</span>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">/ 21</span>
+                        </div>
+                    </div>
+                    
+                    <h2 class="text-xl font-bold ${tier.textColor} mb-2 uppercase tracking-widest">${tier.title}</h2>
+                    
+                    <div class="bg-slate-50 p-8 rounded-lg border border-slate-100 mb-8 text-left relative overflow-hidden">
+                        <!-- Decorative Orange Accent -->
+                        <div class="absolute top-0 left-0 w-1 h-full bg-[#FF671D]"></div>
+                        <p class="text-[#24272A] mb-6 leading-relaxed font-medium text-sm">${tier.msg}</p>
+                        <div class="flex items-center gap-3 text-xs font-bold text-slate-500 bg-white p-3 rounded border border-slate-100 shadow-sm">
+                            <i class="fa-solid fa-envelope text-[#0047BA]"></i>
+                            <span>Report sent to <span class="text-[#24272A]">${state.contact.email}</span></span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Primary CTA: Brand Blue Gradient -->
+                        <a href="https://trustori.co" class="block w-full brand-gradient text-white font-bold py-4 rounded-md shadow-lg transition transform hover:-translate-y-0.5 tracking-wide text-lg flex items-center justify-center gap-2">
+                            <span>Book Consultation</span>
+                            <i class="fa-solid fa-arrow-right text-sm"></i>
+                        </a>
+                        
+                        <!-- Secondary CTA: WhatsApp Green (Standard UX) -->
+                        <a href="https://wa.me/60175601776" target="_blank" class="block w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-4 rounded-md shadow-md transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                            <i class="fa-brands fa-whatsapp text-xl"></i> 
+                            <span>Chat on WhatsApp</span>
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize App
+        init();
+
+    </script>
+</body>
+</html>
